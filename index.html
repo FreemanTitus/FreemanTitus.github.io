@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKO Bank Polski</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-container">
+    
+    <div id="splash-screen">
+        <div class="logo-main">
+           <img src="logo.png" alt="PKO Logo">
+        </div>
+    </div>
+
+    <header class="pko-header">
+        <div class="header-icons">
+            <i class="fas fa-bars"></i> 
+            <i class="fas fa-search"></i> 
+            <i class="fas fa-lock"></i> 
+        </div>
+        <div class="header-logo-section">
+            <img src="logo.png" alt="PKO Logo" class="brand-logo-icon">
+        </div>
+    </header>
+
+    <h1 class="page-title">
+        RACHUNKI<br>KARTY<br>OSZCZĘDNOŚCI
+    </h1>
+
+    <div class="balance-block" onclick="window.location.href='transaction.html'">
+        <span class="balance-label">Konto za Zero</span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+
+    <div class="account-detail-strip">
+        <div class="acc-date">
+            <i class="far fa-calendar-alt"></i> Z dnia 01.01.2026
+        </div>
+        <div class="acc-amount">500,00 PLN<div>
+        <div class="acc-desc">Dostępne środki</div>
+        
+        <button class="pko-btn" style="margin-top: 20px;">
+            Nowy Przelew
+        </button>
+    </div>
+
+    <div style="padding: 0 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <span style="font-weight:bold; text-transform:uppercase;">Ostatnie Operacje</span>
+            <i class="fas fa-chart-bar" style="color:var(--pko-navy); font-size:1.5rem;"></i>
+        </div>
+        <hr style="border:0; border-top:1px solid #eee; margin: 10px 0;">
+    </div>
+
+    <div class="trans-list-container">
+        
+        <div class="trans-item" onclick="window.location.href='transaction.html'">
+            <div class="t-left">
+                <h4>Adam Lewandowski</h4>
+                <span>Przelew natychmiastowy</span>
+            </div>
+            <div class="t-right t-neg">-1 200,00 PLN</div>
+        </div>
+
+        <div class="trans-item" onclick="window.location.href='transaction.html'">
+            <div class="t-left">
+                <h4>Przelew Wewnętrzny</h4>
+                <span>Premia noworoczna</span>
+            </div>
+            <div class="t-right t-pos">+500,00 PLN</div>
+        </div>
+
+        <div class="trans-item" onclick="window.location.href='transaction.html'">
+            <div class="t-left">
+                <h4>Sylwester Party</h4>
+                <span>Płatność kartą</span>
+            </div>
+            <div class="t-right t-neg">-180,00 PLN</div>
+        </div>
+
+        <div class="trans-item" onclick="window.location.href='transaction.html'">
+            <div class="t-left">
+                <h4>Krzysztof Pawlak</h4>
+                <span>Przelew natychmiastowy</span>
+            </div>
+            <div class="t-right t-neg">-750,00 PLN</div>
+        </div>
+
+        <div class="trans-item" onclick="window.location.href='transaction.html'">
+            <div class="t-left">
+                <h4>Monika Jabłońska</h4>
+                <span>Przelew natychmiastowy</span>
+            </div>
+            <div class="t-right t-neg">-620,00 PLN</div>
+        </div>
+
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <i class="fas fa-wallet"></i>
+            <span>Finanse</span>
+        </a>
+        <a href="transaction.html" class="nav-item">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Płatności</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-hand-holding-usd"></i>
+            <span>Oferta</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-ellipsis-h"></i>
+            <span>Więcej</span>
+        </a>
+    </nav>
+</div>
+
+<script>
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            setTimeout(() => { splash.style.display = 'none'; }, 500);
+        }, 2000);
+    });
+</script>
+
+</body>
+</html>
