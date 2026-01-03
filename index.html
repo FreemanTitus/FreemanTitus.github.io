@@ -50,12 +50,15 @@
             height: auto;
         }
 
-        /* --- Greeting Section --- */
+        /* --- Updated Greeting Section CSS --- */
         .user-greeting {
             padding: 50px 20px 10px 20px;
             color: #333;
+            display: flex;            /* Enables side-by-side layout */
+            justify-content: space-between; /* Pushes text left and logo right */
+            align-items: center;      /* Centers them vertically */
         }
-        
+
         .user-greeting h1 {
             margin: 0;
             font-size: 20px;
@@ -66,6 +69,11 @@
 
         .user-greeting h1 span {
             display: block; /* Puts Svedberg on a new line */
+        }
+
+        .greeting-logo img {
+            width: 50px;    /* Adjust size as needed */
+            height: auto;
         }
 
         /* --- Header & List Styles --- */
@@ -172,7 +180,12 @@
     </div>
 
     <div class="user-greeting">
-        <h1>Hej, Lisa Maria <span>Svedberg</span></h1>
+        <div class="greeting-text">
+            <h1>Hej, Lisa Maria <span>Svedberg</span></h1>
+        </div>
+        <div class="greeting-logo">
+            <img src="https://www.swish.nu/assets/swish-logotype-C2_aqj3N.svg" alt="Swish Logo">
+        </div>
     </div>
 
     <div class="header">
