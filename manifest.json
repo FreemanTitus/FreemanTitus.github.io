@@ -1,6 +1,6 @@
 {
-    "name": "PKO Bank",
-    "short_name": "PKO BP",
+    "name": "Swish",
+    "short_name": "Swish",
     "start_url": "index.html",
     "display": "standalone",
     "background_color":"#ffffff",

@@ -1,374 +1,389 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#ffffff">
-    <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
 
-    <title>Historia - PKO BP</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+        .mobile-screen {
+            width: 100%;
+            height: 100vh;
+            background: white;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* --- Splash Screen --- */
+        #splash-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease-out, visibility 0.5s;
+        }
+
+        .logo-main img {
+            width: 120px;
+            height: auto;
+        }
+
+        /* --- Header & List Styles --- */
+        .header { padding: 40px 20px 10px 20px; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+        .header h2 { margin: 0; font-weight: 500; color: #888; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
+        .header h1 { margin: 0; font-size: 34px; font-weight: 300; color: #333; }
+        .header h1 span { color: #bbb; }
+        .transaction-list { flex-grow: 1; overflow-y: auto; }
+        .transaction { position: relative; padding: 18px 20px; border-bottom: 1px solid #f2f2f2; cursor: pointer; }
+        .status-bar { position: absolute; left: 0; top: 20%; bottom: 20%; width: 5px; border-radius: 0 3px 3px 0; }
+        .out { background-color: #eb4d4b; } 
+        .in { background-color: #6ab04c; }
+        .date-row { font-size: 12px; color: #999; margin-bottom: 5px; }
+        .main-row { display: flex; justify-content: space-between; align-items: center; }
+        .name { font-size: 17px; font-weight: 600; color: #2d3436; }
+        .amount { font-size: 17px; font-weight: 600; color: #2d3436; }
+        .amount.negative { color: #eb4d4b; }
+
+        /* --- Expanded View --- */
+        .expanded-details { display: none; background-color: #fcfcfc; margin: 15px -20px -18px -20px; padding: 20px; border-top: 1px solid #eee; font-size: 14px; }
+        .transaction.is-expanded .expanded-details { display: block; }
+        .detail-item { margin-bottom: 10px; line-height: 1.5; }
+        .detail-label { color: #999; font-size: 12px; }
+        .message-box { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd; }
+        .message-label { font-weight: 700; color: #444; display: block; margin-bottom: 4px; }
+        .button-group { display: flex; gap: 8px; margin-top: 20px; }
+        .btn { flex: 1; padding: 10px 0; text-align: center; border: 1px solid #0099d3; border-radius: 4px; font-size: 12px; font-weight: 600; text-transform: lowercase; color: #0099d3; cursor: pointer; }
+        .btn-primary { background-color: #0099d3; color: white; }
+
+        /* --- Swish Confirmation Popup (Modal) --- */
+        #swishPopup {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: white;
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .green-wave {
+            width: 100%;
+            height: 45%;
+            background: linear-gradient(135deg, #a8e063, #56ab2f);
+            border-bottom-left-radius: 50% 20%;
+            border-bottom-right-radius: 50% 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            flex-direction: column;
+        }
+
+        .check-circle {
+            width: 80px; height: 80px;
+            border: 4px solid white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .confirm-msg { font-size: 22px; font-weight: 400; margin-top: 20px; }
+
+        .confirm-details { padding: 40px 20px; color: #333; }
+        .confirm-date { color: #888; font-size: 14px; margin-bottom: 10px; }
+        .confirm-name { font-size: 24px; font-weight: 600; margin-bottom: 5px; }
+        .confirm-phone { color: #888; font-size: 16px; margin-bottom: 30px; }
+        .confirm-amount { font-size: 42px; font-weight: 500; margin-bottom: 10px; }
+        .confirm-memo { color: #666; font-size: 16px; margin-bottom: 40px; }
+
+        .swish-logo { width: 100px; opacity: 0.8; }
+
+        /* Close Button Icon */
+        .close-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 50px; height: 50px;
+            background: #e1f5fe;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #0099d3;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
 
-<div class="app-container">
+<div class="mobile-screen">
 
-    <header class="pko-header">
-        <div class="header-icons">
-            <i class="fas fa-arrow-left" onclick="window.location.href='index.html'"></i>
-            <i class="fas fa-search"></i>
-            <i class="fas fa-lock"></i>
+     <div id="splash-screen">
+        <div class="logo-main">
+           <img src="https://www.swish.nu/assets/swish-logotype-C2_aqj3N.svg" alt="swish">
         </div>
-        <div class="header-logo-section">
-            <img src="logo.png" alt="PKO Logo" class="brand-logo-icon">
-        </div>
-    </header>
+    </div>
 
-    <div class="trans-list-container" style="padding-top: 10px;">
+    <div class="header">
+        <h2>HÄNDELSER</h2>
+        <h1>alla <span>inkommande</span></h1>
+    </div>
+
+    <div class="transaction-list">
         
-        <small style="color:var(--pko-navy); font-weight:bold; margin-bottom:10px; display:block; text-transform:uppercase;">
-            CZWARTEK, 1 STYCZNIA 2026
-        </small>
-
-        <div class="trans-item" onclick="openModal(
-            'Adam Lewandowski',
-            '-1 200,00 PLN',
-            'Przelew natychmiastowy',
-            'Rozliczenie',
-            'PL 91 1020 2222 0000 3333 4444 5555',
-            'BPKOPLPWXXX',
-            'ul. Nowa 18, Kraków',
-            '01.01.2026'
-        )">
-            <div class="t-left">
-                <h4>Adam Lewandowski</h4>
-                <span>Przelew natychmiastowy</span>
+        <div class="transaction is-expanded" onclick="toggleExpand(this)">
+            <div class="status-bar in"></div>
+            <div class="date-row">Idag, kl 10:15</div>
+            <div class="main-row">
+                <div class="name">Erik Berg</div>
+                <div class="amount">5 000,00 <small>kr</small></div>
             </div>
-            <div class="t-right t-neg">-1 200,00 PLN</div>
+            <div class="expanded-details">
+                <div class="detail-item">
+                    <span class="detail-label">Referens:</span> 8472 9910 4423 1182<br>
+                    <span class="detail-label">Från:</span> +46704512233
+                </div>
+                <div class="message-box">
+                    <span class="message-label">Meddelande:</span>
+                    Family support
+                </div>
+                <div class="button-group">
+                    <div class="btn btn-primary">ny betalning</div>
+                    <div class="btn btn-outline">händelser</div>
+                </div>
+            </div>
         </div>
 
-        <div class="trans-item" onclick="openModal(
-            'Przelew Wewnętrzny',
-            '+500,00 PLN',
-            'Przelew przychodzący',
-            'Premia noworoczna',
-            'PL 55 1020 0000 0000 1111 2222 3333',
-            '-',
-            '-',
-            '01.01.2026'
-        )">
-            <div class="t-left">
-                <h4>Przelew Wewnętrzny</h4>
-                <span>Premia noworoczna</span>
+        <div class="transaction is-expanded" onclick="toggleExpand(this)">
+            <div class="status-bar in"></div>
+            <div class="date-row">Igår, kl 18:12</div>
+            <div class="main-row">
+                <div class="name">Kalle Karlsson</div>
+                <div class="amount">450,00 <small>kr</small></div>
             </div>
-            <div class="t-right t-pos">+500,00 PLN</div>
+            <div class="expanded-details">
+                <div class="detail-item">
+                    <span class="detail-label">Referens:</span> 1192 3348 2210 9942<br>
+                    <span class="detail-label">Från:</span> +46731234567
+                </div>
+                <div class="message-box">
+                    <span class="message-label">Meddelande:</span>
+                    Biobiljetter
+                </div>
+                <div class="button-group">
+                    <div class="btn btn-primary">ny betalning</div>
+                    <div class="btn btn-outline">händelser</div>
+                </div>
+            </div>
         </div>
 
-        <small style="color:var(--pko-navy); font-weight:bold; margin:20px 0 10px; display:block; text-transform:uppercase;">
-            ŚRODA, 31 GRUDNIA 2025
-        </small>
-
-        <div class="trans-item" onclick="openModal(
-            'Sylwester Party',
-            '-180,00 PLN',
-            'Płatność kartą',
-            'Impreza sylwestrowa',
-            '-',
-            '-',
-            'Warszawa',
-            '31.12.2025'
-        )">
-            <div class="t-left">
-                <h4>Sylwester Party</h4>
-                <span>Płatność kartą</span>
+        <div class="transaction is-expanded" onclick="toggleExpand(this)">
+            <div class="status-bar out"></div>
+            <div class="date-row">1 jan, kl 13:31</div>
+            <div class="main-row">
+                <div class="name">ICA Supermarket</div>
+                <div class="amount negative">- 1000,00 <small>kr</small></div>
             </div>
-            <div class="t-right t-neg">-180,00 PLN</div>
+
+            <div class="expanded-details">
+                <div class="detail-item">
+                    <span class="detail-label">Referens:</span> 5587 7826 8398 3529<br>
+                    <span class="detail-label">Till:</span> 987 654 32 10
+                </div>
+                <div class="message-box">
+                    <span class="message-label">Meddelande:</span>
+                    Matinköp
+                </div>
+                <div class="button-group">
+                    <div class="btn btn-primary">ny betalning</div>
+                    <div class="btn btn-outline">skicka sms</div>
+                    <!-- <div class="btn" onclick="showPopup()">händelser</div> -->
+                </div>
+            </div>
         </div>
 
-        <div class="trans-item" onclick="openModal(
-            'Krzysztof Pawlak',
-            '-750,00 PLN',
-            'Przelew natychmiastowy',
-            'Rozliczenie roku',
-            'PL 20 1020 8888 0000 9999 0000 1111',
-            'BPKOPLPWXXX',
-            'ul. Kwiatowa 7, Poznań',
-            '31.12.2025'
-        )">
-            <div class="t-left">
-                <h4>Krzysztof Pawlak</h4>
-                <span>Przelew natychmiastowy</span>
+        <div class="transaction is-expanded" onclick="toggleExpand(this)">
+            <div class="status-bar out"></div>
+            <div class="date-row">1 jan, kl 01:30</div>
+            <div class="main-row">
+                <div class="name">Taxi Stockholm</div>
+                <div class="amount negative">- 325,00 <small>kr</small></div>
             </div>
-            <div class="t-right t-neg">-750,00 PLN</div>
+            <div class="expanded-details">
+                <div class="detail-item">
+                    <span class="detail-label">Referens:</span> 4492 1102 3381 2291<br>
+                    <span class="detail-label">Till:</span> 456 788 90 12
+                </div>
+                <div class="message-box">
+                    <span class="message-label">Meddelande:</span>
+                    Taxi nyårsafton
+                </div>
+                <div class="button-group">
+                    <div class="btn btn-primary">ny betalning</div>
+                    <div class="btn btn-outline">händelser</div>
+                </div>
+            </div>
         </div>
 
-        <small style="color:var(--pko-navy); font-weight:bold; margin:20px 0 10px; display:block; text-transform:uppercase;">
-            WTOREK, 30 GRUDNIA 2025
-        </small>
-
-        <div class="trans-item" onclick="openModal(
-            'Monika Jabłońska',
-            '-620,00 PLN',
-            'Przelew natychmiastowy',
-            'Zakupy',
-            'PL 33 1020 4444 0000 5555 6666 7777',
-            'BPKOPLPWXXX',
-            'ul. Handlowa 5, Łódź',
-            '30.12.2025'
-        )">
-            <div class="t-left">
-                <h4>Monika Jabłońska</h4>
-                <span>Przelew natychmiastowy</span>
+        <div class="transaction is-expanded" onclick="toggleExpand(this)">
+            <div class="status-bar out"></div>
+            <div class="date-row">31 dec, kl 20:45</div>
+            <div class="main-row">
+                <div class="name">ICA Supermarket</div>
+                <div class="amount negative">- 890,50 <small>kr</small></div>
             </div>
-            <div class="t-right t-neg">-620,00 PLN</div>
+            <div class="expanded-details">
+                <div class="detail-item">
+                    <span class="detail-label">Referens:</span> 5521 0029 3381 1102<br>
+                    <span class="detail-label">Till:</span> 987 654 32 10
+                </div>
+                <div class="message-box">
+                    <span class="message-label">Meddelande:</span>
+                    Matinköp
+                </div>
+                <div class="button-group">
+                    <div class="btn btn-primary">ny betalning</div>
+                    <div class="btn btn-outline">händelser</div>
+                </div>
+            </div>
         </div>
 
-        <div class="trans-item" onclick="openModal(
-            'Uber',
-            '-46,80 PLN',
-            'Transport',
-            'Przejazd',
-            '-',
-            '-',
-            'Warszawa',
-            '30.12.2025'
-        )">
-            <div class="t-left">
-                <h4>Uber</h4>
-                <span>Transport</span>
+        <div class="transaction is-expanded" onclick="toggleExpand(this)">
+            <div class="status-bar in"></div>
+            <div class="date-row">30 dec, kl 12:05</div>
+            <div class="main-row">
+                <div class="name">Anna Lindgren</div>
+                <div class="amount">1 200,00 <small>kr</small></div>
             </div>
-            <div class="t-right t-neg">-46,80 PLN</div>
+            <div class="expanded-details">
+                <div class="detail-item">
+                    <span class="detail-label">Referens:</span> 3381 2291 0042 1102<br>
+                    <span class="detail-label">Från:</span> +46709876543
+                </div>
+                <div class="message-box">
+                    <span class="message-label">Meddelande:</span>
+                    Hyra förråd
+                </div>
+                <div class="button-group">
+                    <div class="btn btn-primary">ny betalning</div>
+                    <div class="btn btn-outline">händelser</div>
+                </div>
+            </div>
         </div>
 
-        <small style="color:var(--pko-navy); font-weight:bold; margin: 20px 0 10px 0; display:block; text-transform:uppercase;">PONIEDZIAŁEK, 29 GRUDNIA 2025</small>
-        
-        <div class="trans-item" onclick="openModal(
-            'Ewa Gołąb', 
-            '-2 500,00 PLN', 
-            'Przelew natychmiastowy', 
-            'Account Top up', 
-            'PL 65 1020 4867 0000 1902 0176 4422', 
-            'BPKOPLPWXXX', 
-            'ul. Wyszynskiego 10',
-            '29.12.2025'
-        )">
-            <div class="t-left">
-                <h4>Ewa Gołąb</h4>
-                <span>Przelew natychmiastowy</span>
+        <div class="transaction is-expanded" onclick="toggleExpand(this)">
+            <div class="status-bar out"></div>
+            <div class="date-row">29 dec, kl 15:40</div>
+            <div class="main-row">
+                <div class="name">Pressbyrån</div>
+                <div class="amount negative">- 45,00 <small>kr</small></div>
             </div>
-            <div class="t-right t-neg">-2 500,00 PLN</div>
+            <div class="expanded-details">
+                <div class="detail-item">
+                    <span class="detail-label">Referens:</span> 9910 3382 1104 2251<br>
+                    <span class="detail-label">Till:</span> 554 321 00 99
+                </div>
+                <div class="message-box">
+                    <span class="message-label">Meddelande:</span>
+                    Kaffe
+                </div>
+                <div class="button-group">
+                    <div class="btn btn-primary">ny betalning</div>
+                    <div class="btn btn-outline">händelser</div>
+                </div>
+            </div>
         </div>
 
-        <div class="trans-item" onclick="openModal('Netflix', '-43,00 PLN', 'Subskrypcja', 'Opłata miesięczna', '-', '-', '-', '29.12.2025')">
-            <div class="t-left">
-                <h4>Netflix</h4>
-                <span>Subskrypcja</span>
+        <div class="transaction is-expanded" onclick="toggleExpand(this)">
+            <div class="status-bar in"></div>
+            <div class="date-row">28 dec, kl 10:20</div>
+            <div class="main-row">
+                <div class="name">Mohammed Al San</div>
+                <div class="amount">200,00 <small>kr</small></div>
             </div>
-            <div class="t-right t-neg">-43,00 PLN</div>
-        </div>
-
-        <div class="trans-item" onclick="openModal('Żabka', '-24,50 PLN', 'Zakupy spożywcze', 'Płatność kartą', '-', '-', 'ul. Sklepowa 5, Warszawa', '29.12.2025')">
-            <div class="t-left">
-                <h4>Sklep Żabka</h4>
-                <span>Zakupy spożywcze</span>
+            <div class="expanded-details">
+                <div class="detail-item">
+                    <span class="detail-label">Referens:</span> 7742 1109 2238 4401<br>
+                    <span class="detail-label">Från:</span> +46761112233
+                </div>
+                <div class="message-box">
+                    <span class="message-label">Meddelande:</span>
+                    Lunch igår
+                </div>
+                <div class="button-group">
+                    <div class="btn btn-primary">ny betalning</div>
+                    <div class="btn btn-outline">händelser</div>
+                </div>
             </div>
-            <div class="t-right t-neg">-24,50 PLN</div>
-        </div>
-
-        <small style="color:var(--pko-navy); font-weight:bold; margin: 20px 0 10px 0; display:block; text-transform:uppercase;">NIEDZIELA, 28 GRUDNIA 2025</small>
-
-        <div class="trans-item" onclick="openModal('Przelew Wewn.', '+1 000,00 PLN', 'Przelew przychodzący', 'Wynagrodzenie', 'PL 99 1020 ...', '-', '-', '28.12.2025')">
-            <div class="t-left">
-                <h4>Przelew Wewnętrzny</h4>
-                <span>Od: Jan Kowalski</span>
-            </div>
-            <div class="t-right t-pos">+1 000,00 PLN</div>
-        </div>
-
-        <div class="trans-item" onclick="openModal('Anna Nowak', '-1 200,00 PLN', 'Przelew natychmiastowy', 'Pożyczka', 'PL 12 1020 1111 0000 2222 3333 4444', 'BPKOPLPWXXX', 'ul. Mickiewicza 12', '28.12.2025')">
-            <div class="t-left">
-                <h4>Anna Nowak</h4>
-                <span>Przelew natychmiastowy</span>
-            </div>
-            <div class="t-right t-neg">-1 200,00 PLN</div>
-        </div>
-
-        <small style="color:var(--pko-navy); font-weight:bold; margin: 20px 0 10px 0; display:block; text-transform:uppercase;">SOBOTA, 27 GRUDNIA 2025</small>
-
-        <div class="trans-item" onclick="openModal('Piotr Zieliński', '+3 800,00 PLN', 'Przelew natychmiastowy', 'Sprzedaż sprzętu', 'PL 44 1020 5555 0000 6666 7777 8888', 'BPKOPLPWXXX', 'ul. Przemysłowa 4', '27.12.2025')">
-            <div class="t-left">
-                <h4>Piotr Zieliński</h4>
-                <span>Przelew natychmiastowy</span>
-            </div>
-            <div class="t-right t-pos">+3 800,00 PLN</div>
-        </div>
-
-        <div class="trans-item" onclick="openModal('Allegro', '-159,99 PLN', 'Płatność online', 'Zakup online', '-', '-', '-', '27.12.2025')">
-            <div class="t-left">
-                <h4>Allegro</h4>
-                <span>Płatność online</span>
-            </div>
-            <div class="t-right t-neg">-159,99 PLN</div>
-        </div>
-
-        <small style="color:var(--pko-navy); font-weight:bold; margin: 20px 0 10px 0; display:block; text-transform:uppercase;">PIĄTEK, 26 GRUDNIA 2025</small>
-
-        <div class="trans-item" onclick="openModal('Marek Dąbrowski', '+2 000,00 PLN', 'Przelew natychmiastowy', 'Zwrot', 'PL 88 1020 9999 0000 1111 2222 3333', 'BPKOPLPWXXX', 'ul. Lipowa 8', '26.12.2025')">
-            <div class="t-left">
-                <h4>Marek Dąbrowski</h4>
-                <span>Przelew natychmiastowy</span>
-            </div>
-            <div class="t-right t-pos">+2 000,00 PLN</div>
-        </div>
-
-        <div class="trans-item" onclick="openModal('Katarzyna Kaczmarek', '-950,00 PLN', 'Przelew natychmiastowy', 'Czynsz', 'PL 77 1020 4444 0000 5555 6666 7777', 'BPKOPLPWXXX', 'ul. Słoneczna 21', '26.12.2025')">
-            <div class="t-left">
-                <h4>Katarzyna Kaczmarek</h4>
-                <span>Przelew natychmiastowy</span>
-            </div>
-            <div class="t-right t-neg">-950,00 PLN</div>
-        </div>
-
-        <small style="color:var(--pko-navy); font-weight:bold; margin: 20px 0 10px 0; display:block; text-transform:uppercase;">CZWARTEK, 25 GRUDNIA 2025</small>
-
-        <div class="trans-item" onclick="openModal('Biedronka', '-87,40 PLN', 'Zakupy spożywcze', 'Płatność kartą', '-', '-', 'Warszawa', '25.12.2025')">
-            <div class="t-left">
-                <h4>Biedronka</h4>
-                <span>Zakupy spożywcze</span>
-            </div>
-            <div class="t-right t-neg">-87,40 PLN</div>
-        </div>
-
-        <div class="trans-item" onclick="openModal('Tomasz Wiśniewski', '+5 000,00 PLN', 'Przelew natychmiastowy', 'Zwrot Inwestycji', 'PL 10 1020 3333 0000 4444 5555 6666', 'BPKOPLPWXXX', 'ul. Finansowa 3', '25.12.2025')">
-            <div class="t-left">
-                <h4>Tomasz Wiśniewski</h4>
-                <span>Przelew natychmiastowy</span>
-            </div>
-            <div class="t-right t-pos">+5 000,00 PLN</div>
-        </div>
-
-        <small style="color:var(--pko-navy); font-weight:bold; margin: 20px 0 10px 0; display:block; text-transform:uppercase;">ŚRODA, 24 GRUDNIA 2025</small>
-
-        <div class="trans-item" onclick="openModal('Przelew Wewnętrzny', '+7 500,00 PLN', 'Przelew przychodzący', 'Wynagrodzenie', 'PL 55 1020 0000 0000 1111 2222 3333', '-', '-', '24.12.2025')">
-            <div class="t-left">
-                <h4>Przelew Wewnętrzny</h4>
-                <span>Wynagrodzenie</span>
-            </div>
-            <div class="t-right t-pos">+7 500,00 PLN</div>
-        </div>
-
-        <div class="trans-item" onclick="openModal('Jan Malinowski', '-2 300,00 PLN', 'Przelew natychmiastowy', 'Usługi IT', 'PL 60 1020 7777 0000 8888 9999 0000', 'BPKOPLPWXXX', 'ul. Techniczna 14', '24.12.2025')">
-            <div class="t-left">
-                <h4>Jan Malinowski</h4>
-                <span>Przelew natychmiastowy</span>
-            </div>
-            <div class="t-right t-neg">-2 300,00 PLN</div>
-        </div>
-
-        <div class="trans-item" onclick="openModal('Spotify', '-29,99 PLN', 'Subskrypcja', 'Opłata miesięczna', '-', '-', '-', '24.12.2025')">
-            <div class="t-left">
-                <h4>Spotify</h4>
-                <span>Subskrypcja</span>
-            </div>
-            <div class="t-right t-neg">-29,99 PLN</div>
         </div>
 
     </div>
 
-    <div id="txModal" class="modal">
-        <div class="modal-content">
-            <h2 id="m-title" style="margin-bottom:5px; color:var(--pko-navy);">Transaction</h2>
-            <h4 id="m-type" style="margin-bottom:15px; color:#666; font-weight:normal;">Type</h4>
-            
-            <h1 id="m-amount" style="margin-bottom:20px;">0.00</h1>
-            
-            <div style="font-size: 0.85rem; color: #333;">
-                
-                <div style="margin-bottom: 10px;">
-                    <span style="display:block; color:#888; font-size:0.75rem;">Tytuł (Reference)</span>
-                    <span id="m-ref" style="font-weight:bold;">-</span>
-                </div>
-
-                <div style="margin-bottom: 10px;">
-                    <span style="display:block; color:#888; font-size:0.75rem;">Rachunek (IBAN)</span>
-                    <span id="m-iban" style="font-family:monospace; font-weight:bold; letter-spacing:1px;">-</span>
-                </div>
-
-                <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
-                    <div>
-                        <span style="display:block; color:#888; font-size:0.75rem;">BIC / SWIFT</span>
-                        <span id="m-bic" style="font-weight:bold;">-</span>
-                    </div>
-                    <div style="text-align:right;">
-                         <span style="display:block; color:#888; font-size:0.75rem;">Data</span>
-                         <span id="m-date" style="font-weight:bold;">-</span>
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 10px;">
-                    <span style="display:block; color:#888; font-size:0.75rem;">Adres Odbiorcy</span>
-                    <span id="m-address" style="font-weight:bold;">-</span>
-                </div>
-            </div>
-
-            <button class="pko-btn" style="width:100%; margin-top:20px;" onclick="closeModal()">Zamknij</button>
+    <!-- <div id="swishPopup">
+        <div class="green-wave">
+            <div class="check-circle">✓</div>
+            <div class="confirm-msg">Din betalning är skickad!</div>
         </div>
-    </div>
+        
+        <div class="confirm-details">
+            <div class="confirm-date">1 jan. 2026, kl 13:31</div>
+            <div class="confirm-name">Lisa Maria Svedberg</div>
+            <div class="confirm-phone">+46 72 222 61 86</div>
+            <div class="confirm-amount">12500 kr</div>
+            <div class="confirm-memo">Family support</div>
+            <img src="https://www.swish.nu/assets/swish-logotype-C2_aqj3N.svg" class="swish-logo" alt="swish">
+        </div>
 
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fas fa-wallet"></i>
-            <span>Finanse</span>
-        </a>
-        <a href="#" class="nav-item active">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Płatności</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-hand-holding-usd"></i>
-            <span>Oferta</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-ellipsis-h"></i>
-            <span>Więcej</span>
-        </a>
-    </nav>
-
+        <div class="close-btn" onclick="hidePopup()">✕</div>
+    </div> -->
 </div>
 
 <script>
-    function openModal(title, amount, type, ref, iban, bic, address, date) {
-        document.getElementById('m-title').innerText = title;
-        document.getElementById('m-amount').innerText = amount;
-        document.getElementById('m-type').innerText = type;
-        document.getElementById('m-ref').innerText = ref;
-        document.getElementById('m-iban').innerText = iban;
-        document.getElementById('m-bic').innerText = bic;
-        document.getElementById('m-address').innerText = address;
-        document.getElementById('m-date').innerText = date;
+    // Splash screen timer
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.visibility = 'hidden';
+            }, 500);
+        }, 2500);
+    });
 
-        // Color logic
-        const amountEl = document.getElementById('m-amount');
-        if(amount.includes('-')) {
-            amountEl.style.color = '#000'; // Black for negative
-        } else {
-            amountEl.style.color = 'green'; // Green for positive
-        }
-
-        const modal = document.getElementById('txModal');
-        modal.style.display = 'flex';
-        
-        modal.onclick = (e) => {
-            if(e.target === modal) closeModal();
-        }
+    function toggleExpand(element) {
+        element.classList.toggle('is-expanded');
     }
 
-    function closeModal() {
-        document.getElementById('txModal').style.display = 'none';
+    function showPopup() {
+        event.stopPropagation(); // Prevents the transaction from collapsing when clicking händelser
+        document.getElementById('swishPopup').style.display = 'flex';
+    }
+
+    function hidePopup() {
+        document.getElementById('swishPopup').style.display = 'none';
     }
 </script>
 
